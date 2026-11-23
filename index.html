@@ -1513,13 +1513,16 @@ function openPayModal(){
   }
 }
 
-function unlock(){
+function unlock(opts){
+  const isPreview = !!(opts && opts.preview) && CONFIG.PREVIEW_MODE;
   $$("#paid-list .paid-item").forEach(el => {
     el.classList.remove("locked");
     el.classList.add("unlocked");
   });
-  $("#preview-banner").classList.add("show");
-  document.body.classList.add("preview");
+  // '미리보기 모드' 배너와 [잠금 화면으로] 버튼은 제작 확인용 미리보기에서만.
+  // ?paid=1 로 들어온 실제 결제 고객 화면에는 나오지 않는다.
+  $("#preview-banner").classList.toggle("show", isPreview);
+  document.body.classList.toggle("preview", isPreview);
 }
 function relock(){
   $$("#paid-list .paid-item[data-key]").forEach(el => {
@@ -1607,7 +1610,7 @@ function init(){
     if (CONFIG.PAYMENT_URL){ window.location.href = CONFIG.PAYMENT_URL; return; }
     openPayModal();
   });
-  $("#preview-btn").addEventListener("click", () => { if (CONFIG.PREVIEW_MODE) unlock(); });
+  $("#preview-btn").addEventListener("click", () => { if (CONFIG.PREVIEW_MODE) unlock({preview:true}); });
   $("#relock-btn").addEventListener("click", relock);
   $("#modal-close").addEventListener("click", () => $("#pay-modal").classList.remove("show"));
   $("#pay-modal").addEventListener("click", e => { if (e.target.id === "pay-modal") $("#pay-modal").classList.remove("show"); });
