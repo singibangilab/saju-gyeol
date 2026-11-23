@@ -1622,7 +1622,16 @@ function init(){
   $("#reset-btn").addEventListener("click", () => {
     $("#screen-result").classList.add("is-hidden");
     $("#screen-input").classList.remove("is-hidden");
+    // 새 사주를 조회하면 다시 잠금 상태에서 시작한다.
+    // (?paid=1 로 들어와 결제를 마친 사람도 '다른 생년월일로 보기'를 누르면 새 조회는 미결제로 본다.)
+    state.paidUnlocked = false;
     relock();
+    // 주소의 ?paid=1 도 제거해 새로고침·재조회해도 잠금이 풀리지 않게 한다.
+    const url = new URL(location.href);
+    if (url.searchParams.has(CONFIG.SUCCESS_PARAM)){
+      url.searchParams.delete(CONFIG.SUCCESS_PARAM);
+      history.replaceState(null, "", url.pathname + url.search + url.hash);
+    }
     window.scrollTo({top: 0, behavior: "auto"});
   });
 
