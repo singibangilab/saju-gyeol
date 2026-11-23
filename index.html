@@ -460,7 +460,7 @@
 
       <div id="paid-list"></div>
 
-      <div class="pay-box">
+      <div class="pay-box" id="pay-box">
         <div class="price-line"><span class="p" id="price-main">4,000원</span><span class="d">1회 결제 · 상세 리포트 전체</span></div>
         <button class="cta" type="button" id="pay-btn">4,000원으로 상세 풀이 전체 보기</button>
         <button class="ghost small" type="button" id="preview-btn">미리보기: 결제 완료 후 화면 보기</button>
@@ -1519,6 +1519,8 @@ function unlock(opts){
     el.classList.remove("locked");
     el.classList.add("unlocked");
   });
+  // 이미 결제한 고객에게는 가격·결제 버튼 영역을 다시 보여주지 않는다.
+  $("#pay-box").classList.add("is-hidden");
   // '미리보기 모드' 배너와 [잠금 화면으로] 버튼은 제작 확인용 미리보기에서만.
   // ?paid=1 로 들어온 실제 결제 고객 화면에는 나오지 않는다.
   $("#preview-banner").classList.toggle("show", isPreview);
@@ -1529,6 +1531,7 @@ function relock(){
     el.classList.add("locked");
     el.classList.remove("unlocked");
   });
+  $("#pay-box").classList.remove("is-hidden");
   $("#preview-banner").classList.remove("show");
   document.body.classList.remove("preview");
 }
