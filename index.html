@@ -8,6 +8,14 @@
 <meta name="theme-color" content="#080b14" />
 <meta property="og:title" content="사주결 · 무료 사주풀이" />
 <meta property="og:description" content="생년월일시만 넣으면 사주팔자와 오행 분포를 계산해 드립니다. 상세 풀이는 4,000원." />
+<!-- Google tag (gtag.js) — GA4 사주결 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Y0BPPTVKF0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-Y0BPPTVKF0');
+</script>
 <style>
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -1464,7 +1472,7 @@ function renderPaid(d, info){
 
   $$("#paid-list .paid-item[data-key]").forEach(el => {
     el.addEventListener("click", () => {
-      if (el.classList.contains("locked")) openPayModal();
+      if (el.classList.contains("locked")) { trackPaymentClick(); openPayModal(); }
     });
   });
 }
@@ -1498,6 +1506,13 @@ function bindSeg(sel, key){
     state[key] = btn.dataset.value;
     if (key === "calendar") rebuildDays();
   });
+}
+
+// GA4: 4,000원 상세 풀이 결제 버튼 클릭
+function trackPaymentClick(){
+  if (typeof gtag === "function"){
+    gtag("event", "payment_click", { event_category: "conversion", value: 4000, currency: "KRW" });
+  }
 }
 
 function openPayModal(){
@@ -1580,6 +1595,8 @@ function onSubmit(e){
       const data = computeSaju(sy, sm, sd, state.hourBranch === null ? null : state.hour);
       state.data = data;
       renderResult(data, {name: $("#f-name").value, gender: state.gender});
+      // GA4: 무료 사주 조회 완료
+      if (typeof gtag === "function") gtag("event", "saju_view", { event_category: "engagement" });
     } catch(ex){
       console.error(ex);
       err.textContent = "계산 중 문제가 발생했습니다: " + ex.message;
@@ -1606,11 +1623,13 @@ function init(){
   $("#saju-form").addEventListener("submit", onSubmit);
 
   $("#pay-btn").addEventListener("click", () => {
+    trackPaymentClick();
     if (!CONFIG.PREVIEW_MODE && !CONFIG.PAYMENT_URL){
       openPayModal();
       return;
     }
-    if (CONFIG.PAYMENT_URL){ window.location.href = CONFIG.PAYMENT_URL; return; }
+    // GA4 이벤트가 전송될 틈을 준 뒤 결제 페이지로 이동한다.
+    if (CONFIG.PAYMENT_URL){ setTimeout(() => { window.location.href = CONFIG.PAYMENT_URL; }, 250); return; }
     openPayModal();
   });
   $("#preview-btn").addEventListener("click", () => { if (CONFIG.PREVIEW_MODE) unlock({preview:true}); });
